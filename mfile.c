@@ -1,4 +1,6 @@
 #include "mfile.h"
+#include <stdlib.h>
+#include <errno.h>
 
 // TODO: Implement all the functions
 
@@ -47,7 +49,19 @@ size_t mfifo_capacity(mfifo *fifo){
 }
 
 size_t mfifo_free_memory(mfifo *fifo){
-    return 0;
+    if(fifo != NULL){
+        // Calculate the used memory
+        int usedMemory = abs(fifo->finish - fifo->start);
+
+        // Return the free memory
+        return abs(mfifo_capacity(fifo) - usedMemory);
+    }
+    else{
+        // Handle the Null pointer
+        errno = 1;
+        perror("Null argument pointer mfifo_free_memory");
+        exit(EXIT_FAILURE);
+    }
 }
 
 int mfifo_unlock_all(void){

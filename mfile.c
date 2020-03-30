@@ -45,7 +45,14 @@ int mfifo_trylock(mfifo *fifo){
 }
 
 size_t mfifo_capacity(mfifo *fifo){
-    return 0;
+    if(fifo != NULL)
+        return fifo->capacity;
+    else{
+        // Handle the Null pointer
+        errno = 1;
+        perror("Null argument pointer mfifo_capacity");
+        exit(EXIT_FAILURE);
+    }
 }
 
 size_t mfifo_free_memory(mfifo *fifo){

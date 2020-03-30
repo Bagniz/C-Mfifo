@@ -9,7 +9,7 @@
  * Include needed headers
 */
 #include <stdio.h>
-#include <sys/stat.h>
+#include <sys/types.h>
 
 // Define the new Type "mfifo"
 typedef struct {

@@ -7,7 +7,8 @@ LRT=-lrt
 PTHREAD=-pthead
 
 all:  mfile.o mfifo.o
-	$(GCC) $(WALL) $(G) mfile.o $(O) mfile
+	$(GCC) $(WALL) $(G) mfile.o mfifo.o $(O) mfifo
+	make clear
 
 mfifo.o: mfifo.c
 	$(GCC) $(WALL) $(G) $(C) mfifo.c

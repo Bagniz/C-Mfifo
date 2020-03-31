@@ -5,9 +5,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
 
 // TODO: Implement all the functions
-// Used to replace -1 in the code
+// Used to replace -1 & 0 in the code
+#define OP_SUCCEEDED 0
 #define OP_FAILED -1
 
 // Initialize the mfifo object values
@@ -69,11 +71,19 @@ mfifo *mfifo_connect(const char *name, int options, mode_t permission, size_t ca
 }
 
 int mfifo_disconnect(mfifo *fifo){
-    return 0;
+    if(fifo != NULL)
+        // Deallocat all the fifo mapping
+        if(munmap(fifo, sizeof(mfifo) + (mfifo_capacity(fifo) * sizeof(char))) != OP_FAILED){
+            return OP_SUCCEEDED;
+        }
+    return OP_FAILED;
 }
 
 int mfifo_unlink(const char *name){
-    return 0;
+    // Unlink the sharedMfifoObject
+    if(shm_unlink(name) != OP_FAILED)
+        return OP_SUCCEEDED;
+    return OP_FAILED;
 }
 
 int mfifo_write(mfifo *fifo, const void *buffer, size_t length){

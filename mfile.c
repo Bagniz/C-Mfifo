@@ -6,8 +6,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 // TODO: Implement all the functions
+// TODO: Assure Mutual Exclusion
+
 // Used to replace -1 & 0 in the code
 #define OP_SUCCEEDED 0
 #define OP_FAILED -1
@@ -87,11 +90,45 @@ int mfifo_unlink(const char *name){
 }
 
 int mfifo_write(mfifo *fifo, const void *buffer, size_t length){
-    return 0;
+    // If there is no free space to write
+    if(length > mfifo_capacity(fifo)){
+        errno = EMSGSIZE;
+        return OP_FAILED;
+    }
+    
+    // Check if there is free space to write
+    while(length > mfifo_free_memory(fifo));
+        // Condition
+    
+    // Write into fifo
+    for (size_t i = 0; i < length; i++)
+        if(memmove(fifo->memory + i, buffer + i, 1) == NULL)
+            return OP_FAILED;
+
+    fifo->finish = (fifo->finish + length) % mfifo_capacity(fifo);
+    return OP_SUCCEEDED;
 }
 
 int mfifo_trywrite(mfifo *fifo, const void *buffer, size_t length){
-    return 0;
+    // If there is no free space to write
+    if(length > mfifo_capacity(fifo)){
+        errno = EMSGSIZE;
+        return OP_FAILED;
+    }
+    
+    // Check if there is free space to write
+    if(length > mfifo_free_memory(fifo)){
+        errno = EAGAIN;
+        return OP_FAILED;
+    }
+    
+    // Write into fifo
+    for (size_t i = 0; i < length; i++)
+        if(memmove(fifo->memory + i, buffer + i, 1) == NULL)
+            return OP_FAILED;
+
+    fifo->finish = (fifo->finish + length) % mfifo_capacity(fifo);
+    return OP_SUCCEEDED;
 }
 
 int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){

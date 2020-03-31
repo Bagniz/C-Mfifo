@@ -1,11 +1,71 @@
 #include "mfile.h"
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 // TODO: Implement all the functions
+// Used to replace -1 in the code
+#define OP_FAILED -1
+
+// Initialize the mfifo object values
+static void initializeMfifoValues(mfifo *fifo, int capacity){
+    fifo->capacity = capacity;
+    fifo->start = fifo->finish = 0;
+}
 
 mfifo *mfifo_connect(const char *name, int options, mode_t permission, size_t capacity){
-    return 0;
+    // Variables
+    int sharedMfifoObject;
+    struct stat mfifoObjectStat;
+    mfifo *fifo = NULL;
+
+    /**
+     * Convert the value of capacity
+     * to know if it's < 0
+    */
+    ssize_t signedCapacity = capacity;
+
+    // Anonymous mFifo
+    if(name == NULL){
+        if(signedCapacity > 0){
+            // Project an anonymous mmap
+            fifo = mmap(NULL, sizeof(mfifo) + (capacity * sizeof(char)), PROT_WRITE | PROT_READ, MAP_SHARED | MAP_ANON, -1, 0);
+            if(fifo != MAP_FAILED)
+                initializeMfifoValues(fifo, capacity);
+        }
+    }
+    // Named mFifo
+    else{
+        // Connect to existing Mfifo
+        if(options == 0){ 
+            // Open the existing mfifo object
+            sharedMfifoObject = shm_open(name, O_RDWR, 0);
+            if(sharedMfifoObject != OP_FAILED)    
+                // Get the shared object size
+                if(fstat(sharedMfifoObject, &mfifoObjectStat) != OP_FAILED)
+                    // Project the existing mfifo object
+                    fifo = mmap(NULL, mfifoObjectStat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, sharedMfifoObject, 0);
+        }
+        else if((options == O_CREAT || options == (O_CREAT | O_EXCL))) {
+            if(signedCapacity > 0){
+                // Create the mfifo object
+                sharedMfifoObject = shm_open(name, options | O_RDWR, permission);
+                if(sharedMfifoObject != OP_FAILED){
+                    // Resize the shared object
+                    if(ftruncate(sharedMfifoObject, sizeof(mfifo) + (capacity * sizeof(char))) != OP_FAILED){
+                        // Project the existing mfifo object
+                        fifo = mmap(NULL, sizeof(mfifo) + (capacity * sizeof(char)), PROT_READ | PROT_WRITE, MAP_SHARED, sharedMfifoObject, 0);
+                        if(fifo != MAP_FAILED)
+                            initializeMfifoValues(fifo, capacity);
+                    }
+                }
+            }
+        }
+    }
+    return fifo;
 }
 
 int mfifo_disconnect(mfifo *fifo){
@@ -50,7 +110,7 @@ size_t mfifo_capacity(mfifo *fifo){
     else{
         // Handle the Null pointer
         errno = 1;
-        perror("Null argument pointer mfifo_capacity");
+        perror("mfifo_capacity");
         exit(EXIT_FAILURE);
     }
 }
@@ -66,7 +126,7 @@ size_t mfifo_free_memory(mfifo *fifo){
     else{
         // Handle the Null pointer
         errno = 1;
-        perror("Null argument pointer mfifo_free_memory");
+        perror("mfifo_free_memory");
         exit(EXIT_FAILURE);
     }
 }

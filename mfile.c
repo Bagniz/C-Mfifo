@@ -1,3 +1,6 @@
+// Fixes undefined MAP_ANON
+#define _GNU_SOURCE
+
 #include "mfile.h"
 #include <stdlib.h>
 #include <errno.h>

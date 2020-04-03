@@ -6,6 +6,7 @@ C=-c
 LRT=-lrt
 PTHREAD=-pthead
 
+.SILENT:
 all:  mfile.o mfifo.o
 	$(GCC) $(WALL) $(G) mfile.o mfifo.o $(O) mfifo $(LRT)
 	make clear

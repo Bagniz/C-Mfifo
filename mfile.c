@@ -37,8 +37,9 @@ mfifo *mfifo_connect(const char *name, int options, mode_t permission, size_t ca
         if(signedCapacity > 0){
             // Project an anonymous mmap
             fifo = mmap(NULL, sizeof(mfifo) + (capacity * sizeof(char)), PROT_WRITE | PROT_READ, MAP_SHARED | MAP_ANON, -1, 0);
-            if(fifo != MAP_FAILED)
+            if(fifo != MAP_FAILED){
                 initializeMfifoValues(fifo, capacity);
+            }
         }
     }
     // Named mFifo
@@ -47,11 +48,13 @@ mfifo *mfifo_connect(const char *name, int options, mode_t permission, size_t ca
         if(options == 0){ 
             // Open the existing mfifo object
             sharedMfifoObject = shm_open(name, O_RDWR, 0);
-            if(sharedMfifoObject != OP_FAILED)    
+            if(sharedMfifoObject != OP_FAILED){
                 // Get the shared object size
-                if(fstat(sharedMfifoObject, &mfifoObjectStat) != OP_FAILED)
+                if(fstat(sharedMfifoObject, &mfifoObjectStat) != OP_FAILED){
                     // Project the existing mfifo object
                     fifo = mmap(NULL, mfifoObjectStat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, sharedMfifoObject, 0);
+                }
+            }
         }
         else if((options == O_CREAT || options == (O_CREAT | O_EXCL))) {
             if(signedCapacity > 0){
@@ -62,8 +65,9 @@ mfifo *mfifo_connect(const char *name, int options, mode_t permission, size_t ca
                     if(ftruncate(sharedMfifoObject, sizeof(mfifo) + (capacity * sizeof(char))) != OP_FAILED){
                         // Project the existing mfifo object
                         fifo = mmap(NULL, sizeof(mfifo) + (capacity * sizeof(char)), PROT_READ | PROT_WRITE, MAP_SHARED, sharedMfifoObject, 0);
-                        if(fifo != MAP_FAILED)
+                        if(fifo != MAP_FAILED){
                             initializeMfifoValues(fifo, capacity);
+                        }
                     }
                 }
             }
@@ -73,18 +77,20 @@ mfifo *mfifo_connect(const char *name, int options, mode_t permission, size_t ca
 }
 
 int mfifo_disconnect(mfifo *fifo){
-    if(fifo != NULL)
-        // Deallocat all the fifo mapping
+    if(fifo != NULL){
+        // Deallocate all the fifo mapping
         if(munmap(fifo, sizeof(mfifo) + (mfifo_capacity(fifo) * sizeof(char))) != OP_FAILED){
             return OP_SUCCEEDED;
         }
+    }
     return OP_FAILED;
 }
 
 int mfifo_unlink(const char *name){
     // Unlink the sharedMfifoObject
-    if(shm_unlink(name) != OP_FAILED)
+    if(shm_unlink(name) != OP_FAILED){
         return OP_SUCCEEDED;
+    }
     return OP_FAILED;
 }
 
@@ -100,10 +106,13 @@ int mfifo_write(mfifo *fifo, const void *buffer, size_t length){
         // Condition
     
     // Write into fifo
-    if(memmove(fifo->memory, buffer, length) == NULL)
+    if(memmove(fifo->memory, buffer, length) == NULL){
         return OP_FAILED;
+    }
 
+    // Update the finish field
     fifo->finish = (fifo->finish + length) % mfifo_capacity(fifo);
+
     return OP_SUCCEEDED;
 }
 
@@ -121,10 +130,13 @@ int mfifo_trywrite(mfifo *fifo, const void *buffer, size_t length){
     }
     
     // Write into fifo
-    if(memmove(fifo->memory, buffer, length) == NULL)
+    if(memmove(fifo->memory, buffer, length) == NULL){
         return OP_FAILED;
+    }
 
+    // Update the finish field
     fifo->finish = (fifo->finish + length) % mfifo_capacity(fifo);
+
     return OP_SUCCEEDED;
 }
 
@@ -138,9 +150,11 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
                 size_t toWrite = (length > mfifo_free_memory(fifo))? (length - mfifo_free_memory(fifo)) : length;
 
                 // Write into fifo
-                if(memmove(fifo->memory, buffer, toWrite) == NULL)
+                if(memmove(fifo->memory, buffer, toWrite) == NULL){
                     return OP_FAILED;
-
+                }
+                
+                // Update the finish field
                 fifo->finish = (fifo->finish + toWrite) % mfifo_capacity(fifo);
 
                 // Decrease the length
@@ -156,8 +170,28 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
 }
 
 ssize_t mfifo_read(mfifo *fifo, void *buffer, size_t length){
-    return 0;
+    // Variables
+    size_t toRead, filledSpace;
+
+    // Is it not empty
+    if((filledSpace = mfifo_capacity(fifo) - mfifo_free_memory(fifo)) > 0){
+        // Get size to read
+        toRead = (length <= filledSpace)? length : filledSpace;
+
+        // Read from fifo
+        if(memmove(buffer, &fifo->memory[fifo->start], toRead) == NULL){
+            return OP_FAILED;
+        }
+
+        // Update the start field
+        fifo->start = (fifo->start + toRead) % mfifo_capacity(fifo);
+
+        return toRead;
+    }
+
+    return OP_FAILED;
 }
+
 
 int mfifo_lock(mfifo *fifo){
     return 0;
@@ -171,9 +205,14 @@ int mfifo_trylock(mfifo *fifo){
     return 0;
 }
 
+int mfifo_unlock_all(void){
+    return 0;
+}
+
 size_t mfifo_capacity(mfifo *fifo){
-    if(fifo != NULL)
+    if(fifo != NULL){
         return fifo->capacity;
+    }
 
     // Handle the Null pointer
     errno = 1;
@@ -191,9 +230,5 @@ size_t mfifo_free_memory(mfifo *fifo){
 
     // Handle the Null pointer
     errno = 1;
-    return 0;
-}
-
-int mfifo_unlock_all(void){
     return 0;
 }

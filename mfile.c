@@ -1,12 +1,11 @@
 #include "mfile.h"
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
 
 // TODO: Implement all the functions
 // TODO: Assure Mutual Exclusion
@@ -101,9 +100,8 @@ int mfifo_write(mfifo *fifo, const void *buffer, size_t length){
         // Condition
     
     // Write into fifo
-    for (size_t i = 0; i < length; i++)
-        if(memmove(fifo->memory + i, buffer + i, 1) == NULL)
-            return OP_FAILED;
+    if(memmove(fifo->memory, buffer, length) == NULL)
+        return OP_FAILED;
 
     fifo->finish = (fifo->finish + length) % mfifo_capacity(fifo);
     return OP_SUCCEEDED;
@@ -123,16 +121,38 @@ int mfifo_trywrite(mfifo *fifo, const void *buffer, size_t length){
     }
     
     // Write into fifo
-    for (size_t i = 0; i < length; i++)
-        if(memmove(fifo->memory + i, buffer + i, 1) == NULL)
-            return OP_FAILED;
+    if(memmove(fifo->memory, buffer, length) == NULL)
+        return OP_FAILED;
 
     fifo->finish = (fifo->finish + length) % mfifo_capacity(fifo);
     return OP_SUCCEEDED;
 }
 
 int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
-    return 0;
+    // Check if fifo capacity is more than 0
+    if(mfifo_capacity(fifo) > 0){
+        // While we did not write everything
+        while(length > 0){
+            if(mfifo_free_memory(fifo) > 0){
+                // Get the length of the buffer we are going to write
+                size_t toWrite = (length > mfifo_free_memory(fifo))? (length - mfifo_free_memory(fifo)) : length;
+
+                // Write into fifo
+                if(memmove(fifo->memory, buffer, toWrite) == NULL)
+                    return OP_FAILED;
+
+                fifo->finish = (fifo->finish + toWrite) % mfifo_capacity(fifo);
+
+                // Decrease the length
+                length -= toWrite;
+            }
+        }
+
+        return OP_SUCCEEDED;
+    }
+    
+    errno = EMSGSIZE;
+    return OP_FAILED;
 }
 
 ssize_t mfifo_read(mfifo *fifo, void *buffer, size_t length){
@@ -154,12 +174,10 @@ int mfifo_trylock(mfifo *fifo){
 size_t mfifo_capacity(mfifo *fifo){
     if(fifo != NULL)
         return fifo->capacity;
-    else{
-        // Handle the Null pointer
-        errno = 1;
-        perror("mfifo_capacity");
-        exit(EXIT_FAILURE);
-    }
+
+    // Handle the Null pointer
+    errno = 1;
+    return 0;
 }
 
 size_t mfifo_free_memory(mfifo *fifo){
@@ -170,12 +188,10 @@ size_t mfifo_free_memory(mfifo *fifo){
         // Return the free memory
         return abs(mfifo_capacity(fifo) - usedMemory);
     }
-    else{
-        // Handle the Null pointer
-        errno = 1;
-        perror("mfifo_free_memory");
-        exit(EXIT_FAILURE);
-    }
+
+    // Handle the Null pointer
+    errno = 1;
+    return 0;
 }
 
 int mfifo_unlock_all(void){

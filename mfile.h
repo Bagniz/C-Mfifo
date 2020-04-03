@@ -38,17 +38,17 @@ int mfifo_disconnect(mfifo *fifo);
 int mfifo_unlink(const char *name);
 
 /**
- * A synchrones method to write into a fifo object
+ * A synchrones function to write into a fifo object
 */
 int mfifo_write(mfifo *fifo, const void *buffer, size_t length);
 
 /**
- * An asynchronous method to write into a fifo object
+ * An asynchronous function to write into a fifo object
 */
 int mfifo_trywrite(mfifo *fifo, const void *buffer, size_t length);
 
 /**
- * A synchronous method to write into a fifo object
+ * A synchronous function to write into a fifo object
  * that writes all the length from the buffer
 */
 int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length);
@@ -59,24 +59,24 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length);
 ssize_t mfifo_read(mfifo *fifo, void *buffer, size_t length);
 
 /**
- * A synchronous method to lock
+ * A synchronous function to lock
  * the fifo object for reading 
 */
 int mfifo_lock(mfifo *fifo);
 
 /**
- * A method to unlock a fifo object 
+ * A function to unlock a fifo object 
 */
 int mfifo_unlock(mfifo *fifo);
 
 /**
- * An asynchronous method to lock
+ * An asynchronous function to lock
  * the fifo object for reading 
 */
 int mfifo_trylock(mfifo *fifo);
 
 /**
- * A method to unlock all locked
+ * A function to unlock all locked
  * fifo objects by a process
 */
 int mfifo_unlock_all(void);

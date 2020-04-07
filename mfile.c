@@ -162,10 +162,7 @@ int mfifo_disconnect(mfifo *fifo){
 
 int mfifo_unlink(const char *name){
     // Unlink the sharedMfifoObject
-    if(shm_unlink(name) != OP_FAILED){
-        return OP_SUCCEEDED;
-    }
-    return OP_FAILED;
+    return shm_unlink(name);
 }
 
 int mfifo_write(mfifo *fifo, const void *buffer, size_t length){
@@ -340,7 +337,6 @@ ssize_t mfifo_read(mfifo *fifo, void *buffer, size_t length){
     }
     return OP_FAILED;
 }
-
 
 int mfifo_lock(mfifo *fifo){
     if(fifo != NULL){

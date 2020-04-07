@@ -13,7 +13,6 @@ int main(int argc, char **argv){
         printf("Count: %ld\n", count);
         printf("Read: %d\n", readed[0]);
     }
-
     mfifo_unlink("salim");
     return 0;
 }

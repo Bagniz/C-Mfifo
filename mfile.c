@@ -24,8 +24,11 @@ static int initializeMutexes(pthread_mutex_t *mutex){
     if((code = pthread_mutexattr_init(&mutexAttr)) == 0){
         // Set mutexAttr shareability
         if((code = pthread_mutexattr_setpshared(&mutexAttr, PTHREAD_PROCESS_SHARED)) == 0){
-            // Initialize the mutex
-            code = pthread_mutex_init(mutex, &mutexAttr);
+            // Set mutex type
+            if((code = pthread_mutexattr_settype(&mutexAttr, PTHREAD_MUTEX_ERRORCHECK)) == 0){
+                // Initialize the mutex
+                code = pthread_mutex_init(mutex, &mutexAttr);
+            }
         }
     }
 
@@ -287,27 +290,54 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
 ssize_t mfifo_read(mfifo *fifo, void *buffer, size_t length){
     // Variables
     size_t toRead, filledSpace;
+    int code;
 
-    // Is it not empty
-    while((filledSpace = mfifo_capacity(fifo) - mfifo_free_memory(fifo)) <= 0){
-        // Wait until the fifo is filled
-        pthread_cond_wait(&fifo->isNotEmpty, &fifo->mutexReader);
+    // Try lock the mutexReader
+    if((code = pthread_mutex_lock(&fifo->mutexReader)) == 0){
+        // Is it not empty
+        while((filledSpace = mfifo_capacity(fifo) - mfifo_free_memory(fifo)) <= 0){
+            // Wait until the fifo is filled
+            pthread_cond_wait(&fifo->isNotEmpty, &fifo->mutexReader);
+        }
+
+        // Get size to read
+        toRead = (length <= filledSpace)? length : filledSpace;
+
+        // Read from fifo
+        if(memmove(buffer, &fifo->memory[fifo->start], toRead) != NULL){
+            // Update the start field
+            fifo->start = (fifo->start + toRead) % mfifo_capacity(fifo);
+
+            // Unlock the mutex
+            pthread_mutex_unlock(&fifo->mutexReader);
+
+            // Signal writer to write if he want
+            pthread_cond_signal(&fifo->isNotFilled);
+
+            return toRead;
+        }
+
+        // Unlock the mutex
+        pthread_mutex_unlock(&fifo->mutexReader);
     }
+    else{
+        // Is it not empty
+        if((filledSpace = mfifo_capacity(fifo) - mfifo_free_memory(fifo)) > 0){
+            // Does mfifo contain at least length characters
+            if(filledSpace >= length){
+                // Read from fifo
+                if(memmove(buffer, &fifo->memory[fifo->start], length) != NULL){
+                    // Update the start field
+                    fifo->start = (fifo->start + length) % mfifo_capacity(fifo);
 
-    // Get size to read
-    toRead = (length <= filledSpace)? length : filledSpace;
+                    // Signal writer to write if he want
+                    pthread_cond_signal(&fifo->isNotFilled);
 
-    // Read from fifo
-    if(memmove(buffer, &fifo->memory[fifo->start], toRead) != NULL){
-        // Update the start field
-        fifo->start = (fifo->start + toRead) % mfifo_capacity(fifo);
-
-        // Signal writer to write if he want
-        pthread_cond_signal(&fifo->isNotFilled);
-
-        return toRead;
+                    return length;
+                }
+            }
+        }
     }
-
     return OP_FAILED;
 }
 
@@ -348,7 +378,7 @@ int mfifo_trylock(mfifo *fifo){
             return OP_SUCCEEDED;
         }
 
-        errno = code;
+        errno = EAGAIN;
     }
     return OP_FAILED;
 }

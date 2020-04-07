@@ -17,7 +17,6 @@ typedef struct {
     size_t capacity;
     size_t start;
     size_t finish;
-    // TODO: Add the Semaphores & mutexes
     pthread_mutex_t mutexReader;
     pthread_mutex_t mutexWriter;
     pthread_cond_t isNotFilled;

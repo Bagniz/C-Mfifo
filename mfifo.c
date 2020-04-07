@@ -3,6 +3,7 @@
 
 int main(int argc, char **argv){
     mfifo *fifo = mfifo_connect("salim", O_CREAT, 0666, 32);
+    printf("%ld\n", mfifo_capacity(fifo));
     int i = 51;
     char readed[50];
     if(mfifo_write(fifo, &i, sizeof(i)) != -1){
@@ -11,6 +12,6 @@ int main(int argc, char **argv){
         printf("Count: %ld\n", count);
         printf("Read: %d\n", readed[0]);
     }
-    
+
     return 0;
 }

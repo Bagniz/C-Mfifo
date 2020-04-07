@@ -10,6 +10,7 @@
 */
 #include <stdio.h>
 #include <sys/types.h>
+#include <pthread.h>
 
 // Define the new Type "mfifo"
 typedef struct {
@@ -17,8 +18,12 @@ typedef struct {
     size_t start;
     size_t finish;
     // TODO: Add the Semaphores & mutexes
+    pthread_mutex_t mutexReader;
+    pthread_mutex_t mutexWriter;
+    pthread_cond_t isNotFilled;
+    pthread_cond_t isNotEmpty;
     char memory[];
-}mfifo;
+} mfifo;
 
 /**
  * Connects or creats an anonymous or named

@@ -4,11 +4,11 @@ G=-g
 O=-o
 C=-c
 LRT=-lrt
-PTHREAD=-pthead
+PTHREAD=-pthread
 
 .SILENT:
 all:  mfile.o mfifo.o
-	$(GCC) $(WALL) $(G) mfile.o mfifo.o $(O) mfifo $(LRT)
+	$(GCC) $(WALL) $(G) mfile.o mfifo.o $(O) mfifo $(LRT) $(PTHREAD)
 	make clear
 
 mfifo.o: mfifo.c

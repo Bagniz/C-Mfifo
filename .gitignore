@@ -1,3 +1,5 @@
-mfifo
+creator
+reader
+writer
 mfifo.o
 mfile.o

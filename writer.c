@@ -11,9 +11,10 @@ int main(int argc, char **argv){
 
         // Write to the fifo object
         for (int i = 0; i < 5; i++){
-            int j = i + 1;
-            mfifo_write(fifo, &j, sizeof(i));
-            printf("Wrote %d\n", j);
+            int j = (random() % 100) + 1;
+            if(mfifo_write(fifo, &j, sizeof(j)) == 0){
+                printf("Wrote %d\n", j);
+            }
         }
     }
     else{

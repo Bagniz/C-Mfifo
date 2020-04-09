@@ -153,9 +153,7 @@ mfifo *mfifo_connect(const char *name, int options, mode_t permission, size_t ca
 int mfifo_disconnect(mfifo *fifo){
     if(fifo != NULL){
         // Deallocate all the fifo mapping
-        if(munmap(fifo, sizeof(mfifo) + (mfifo_capacity(fifo) * sizeof(char))) != OP_FAILED){
-            return OP_SUCCEEDED;
-        }
+        return munmap(fifo, sizeof(mfifo) + (fifo->capacity * sizeof(char)));
     }
     return OP_FAILED;
 }
@@ -167,7 +165,7 @@ int mfifo_unlink(const char *name){
 
 int mfifo_write(mfifo *fifo, const void *buffer, size_t length){
     // If there is no free space to write
-    if(length <= mfifo_capacity(fifo)){
+    if(length <= fifo->capacity){
         // Lock the object
         pthread_mutex_lock(&fifo->mutexWriter);
 
@@ -180,7 +178,7 @@ int mfifo_write(mfifo *fifo, const void *buffer, size_t length){
         // Write into fifo
         if(memmove(fifo->memory + fifo->finish, buffer, length) != NULL){
             // Update the finish field
-            fifo->finish = (fifo->finish + length) % mfifo_capacity(fifo);
+            fifo->finish = (fifo->finish + length) % fifo->capacity;
 
             // Unlock the mutex
             pthread_mutex_unlock(&fifo->mutexWriter);
@@ -206,7 +204,7 @@ int mfifo_trywrite(mfifo *fifo, const void *buffer, size_t length){
     int code;
 
     // If there is no free space to write
-    if(length <= mfifo_capacity(fifo)){
+    if(length <= fifo->capacity){
         // Try to lock on the fifo object
         if((code = pthread_mutex_trylock(&fifo->mutexWriter)) == 0){
             // Check if there is free space to write
@@ -214,7 +212,7 @@ int mfifo_trywrite(mfifo *fifo, const void *buffer, size_t length){
                 // Write into fifo
                 if(memmove(fifo->memory + fifo->finish, buffer, length) != NULL){
                     // Update the finish field
-                    fifo->finish = (fifo->finish + length) % mfifo_capacity(fifo);
+                    fifo->finish = (fifo->finish + length) % fifo->capacity;
 
                     // Unlock the mutex
                     pthread_mutex_unlock(&fifo->mutexWriter);
@@ -245,7 +243,7 @@ int mfifo_trywrite(mfifo *fifo, const void *buffer, size_t length){
 
 int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
     // Check if fifo capacity is more than 0
-    if(mfifo_capacity(fifo) > 0){
+    if(fifo->capacity > 0){
         // While we did not write everything
         while(length > 0){
             // Lock the object
@@ -264,7 +262,7 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
                 }
                 
                 // Update the finish field
-                fifo->finish = (fifo->finish + toWrite) % mfifo_capacity(fifo);
+                fifo->finish = (fifo->finish + toWrite) % fifo->capacity;
 
                 // Decrease the length
                 length -= toWrite;
@@ -292,7 +290,7 @@ ssize_t mfifo_read(mfifo *fifo, void *buffer, size_t length){
     // Try lock the mutexReader
     if((code = pthread_mutex_lock(&fifo->mutexReader)) == 0){
         // Is it not empty
-        while((filledSpace = mfifo_capacity(fifo) - mfifo_free_memory(fifo)) <= 0){
+        while((filledSpace = fifo->capacity - mfifo_free_memory(fifo)) <= 0){
             // Wait until the fifo is filled
             pthread_cond_wait(&fifo->isNotEmpty, &fifo->mutexReader);
         }
@@ -303,7 +301,7 @@ ssize_t mfifo_read(mfifo *fifo, void *buffer, size_t length){
         // Read from fifo
         if(memmove(buffer, fifo->memory + fifo->start, toRead) != NULL){
             // Update the start field
-            fifo->start = (fifo->start + toRead) % mfifo_capacity(fifo);
+            fifo->start = (fifo->start + toRead) % fifo->capacity;
 
             // Unlock the mutex
             pthread_mutex_unlock(&fifo->mutexReader);
@@ -319,13 +317,13 @@ ssize_t mfifo_read(mfifo *fifo, void *buffer, size_t length){
     }
     else{
         // Is it not empty
-        if((filledSpace = mfifo_capacity(fifo) - mfifo_free_memory(fifo)) > 0){
+        if((filledSpace = fifo->capacity - mfifo_free_memory(fifo)) > 0){
             // Does mfifo contain at least length characters
             if(filledSpace >= length){
                 // Read from fifo
                 if(memmove(buffer, &fifo->memory[fifo->start], length) != NULL){
                     // Update the start field
-                    fifo->start = (fifo->start + length) % mfifo_capacity(fifo);
+                    fifo->start = (fifo->start + length) % fifo->capacity;
 
                     // Signal writer to write if he want
                     pthread_cond_signal(&fifo->isNotFilled);
@@ -399,7 +397,7 @@ size_t mfifo_free_memory(mfifo *fifo){
         int usedMemory = abs(fifo->finish - fifo->start);
 
         // Return the free memory
-        return abs(mfifo_capacity(fifo) - usedMemory);
+        return abs(fifo->capacity - usedMemory);
     }
 
     // Handle the Null pointer

@@ -6,7 +6,7 @@
 int main(int argc, char **argv){
     // Variables
     mfifo *fifo;
-    if((fifo = mfifo_connect("Salim", 0, 0666, 10)) != NULL){
+    if((fifo = mfifo_connect("Salim", 0, 0666, 13)) != NULL){
         srandom(getpid());
 
         // Write to the fifo object
@@ -16,6 +16,10 @@ int main(int argc, char **argv){
                 printf("Wrote %d\n", j);
             }
         }
+        // int j = (random() % 500) + 1;
+        // if(mfifo_write(fifo, &j, sizeof(j)) == 0){
+        //     printf("Wrote %d\n", j);
+        // }
     }
     else{
         printf("sdazd\n");

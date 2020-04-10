@@ -1,6 +1,7 @@
 // Fixes undefined MAP_ANON
 #define _GNU_SOURCE
 
+// All the inlcudes we need
 #include "mfile.h"
 #include <stdlib.h>
 #include <errno.h>
@@ -9,6 +10,19 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+// Define the new type fifoType
+struct fifoType
+{
+    size_t capacity;
+    size_t start;
+    size_t finish;
+    pthread_mutex_t mutexReader;
+    pthread_mutex_t mutexWriter;
+    pthread_cond_t isNotFilled;
+    pthread_cond_t isNotEmpty;
+    char memory[];
+};
 
 // Used to replace -1 & 0 in the code
 #define OP_SUCCEEDED 0
@@ -155,6 +169,7 @@ int mfifo_disconnect(mfifo *fifo){
         // Deallocate all the fifo mapping
         return munmap(fifo, sizeof(mfifo) + (fifo->capacity * sizeof(char)));
     }
+    errno = EINVAL;
     return OP_FAILED;
 }
 

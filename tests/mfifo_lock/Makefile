@@ -7,8 +7,7 @@ LRT=-lrt
 PTHREAD=-pthread
 
 .SILENT:
-all: creator writer reader 
-	make clear
+all:
 
 clear:
 	rm *.o

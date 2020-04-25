@@ -13,8 +13,7 @@
 #include <stdbool.h>
 
 // Define the new type fifoType
-struct fifoType
-{
+struct fifoType {
     size_t capacity;
     size_t start;
     size_t finish;
@@ -277,6 +276,7 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
                 for (size_t i = 0; i < toWrite; i++){
                     if(fifo->finish == (fifo->capacity - 1)){
                         fifo->finish = 0;
+                        fifo->turned = true;
                     }
 
                     if(memmove(fifo->memory + fifo->finish, buffer + i, 1) == NULL){

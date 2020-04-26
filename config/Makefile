@@ -27,3 +27,7 @@ mfile.o: ../src/mfile.c ../src/mfile.h
 
 clear:
 	rm *.o
+
+clean:
+	rm create
+	rm delete

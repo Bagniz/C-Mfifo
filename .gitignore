@@ -5,12 +5,11 @@ capacity
 connect
 disconnect
 free_memory
-lock
+lock_unlock
 read
-trylock
+trylock_unlock
 trywrite
 unlink
-unlock
 unlock_all
 write
 write_partial

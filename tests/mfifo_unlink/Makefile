@@ -19,3 +19,6 @@ mfile.o: ../../src/mfile.c ../../src/mfile.h
 
 clear:
 	rm *.o
+
+clean:
+	rm unlink

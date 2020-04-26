@@ -18,7 +18,7 @@ int main(int argc, char **argv){
             printf("Error, maybe check argument values\n");
         }
         else{
-            printf("Mfifo object %s created with capacity %ld\n", argv[1], mfifo_capacity(fifo));
+            printf("Mfifo object \033[1;34m%s\033[0m created with capacity \033[1;34m%ld\033[0m\n", argv[1], mfifo_capacity(fifo));
         }
     }
     else{

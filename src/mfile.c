@@ -177,7 +177,11 @@ int mfifo_disconnect(mfifo *fifo){
 
 int mfifo_unlink(const char *name){
     // Unlink the sharedMfifoObject
-    return shm_unlink(name);
+    if(name != NULL)
+        return shm_unlink(name);
+
+    errno = EINVAL;
+    return OP_FAILED;
 }
 
 static int writeMFifo(mfifo *fifo, const void *buffer, size_t length){

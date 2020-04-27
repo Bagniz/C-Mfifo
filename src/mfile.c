@@ -187,7 +187,7 @@ int mfifo_unlink(const char *name){
 static int writeMFifo(mfifo *fifo, const void *buffer, size_t length){
     // Write into fifo
     for (size_t i = 0; i < length; i++){
-        if(fifo->finish == (fifo->capacity - 1)){
+        if(fifo->finish == fifo->capacity){
             fifo->finish = 0;
             fifo->turned = true;
         }
@@ -200,7 +200,7 @@ static int writeMFifo(mfifo *fifo, const void *buffer, size_t length){
         }
 
         // Update the finish field
-        fifo->finish = (fifo->finish + 1) % fifo->capacity;
+        fifo->finish = fifo->finish + 1;
     }
     // Unlock the mutex
     pthread_mutex_unlock(&fifo->mutexWriter);
@@ -278,7 +278,7 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
 
                 // Write into fifo
                 for (size_t i = 0; i < toWrite; i++){
-                    if(fifo->finish == (fifo->capacity - 1)){
+                    if(fifo->finish == fifo->capacity){
                         fifo->finish = 0;
                         fifo->turned = true;
                     }
@@ -291,7 +291,7 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
                     }
 
                     // Update the finish field
-                    fifo->finish = (fifo->finish + 1) % fifo->capacity;
+                    fifo->finish = fifo->finish + 1;
                 }
 
                 // Decrease the length
@@ -315,7 +315,7 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
 static ssize_t readMFifo(mfifo *fifo, void *buffer, size_t length){
     // Read from fifo
     for (size_t i = 0; i < length; i++){
-        if(fifo->start == (fifo->capacity - 1)){
+        if(fifo->start == fifo->capacity){
             fifo->start = 0;
             fifo->turned = false;
         }
@@ -328,7 +328,7 @@ static ssize_t readMFifo(mfifo *fifo, void *buffer, size_t length){
         }
 
         // Update the start field
-        fifo->start = (fifo->start + 1) % fifo->capacity;
+        fifo->start = fifo->start + 1;
     }
     
     // Unlock the mutex

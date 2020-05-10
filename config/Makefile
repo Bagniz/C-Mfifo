@@ -9,6 +9,7 @@ PTHREAD=-pthread
 .SILENT:
 all: create delete
 	make clear
+	echo 'Compilation Succeed'	
 
 delete: mfile.o delete_mfifo.o
 	$(GCC) $(WALL) $(G) mfile.o delete_mfifo.o $(O) delete $(LRT) $(PTHREAD)

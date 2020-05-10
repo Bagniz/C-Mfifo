@@ -37,6 +37,11 @@ need to:
 ```git
 git clone https://gaufre.informatique.univ-paris-diderot.fr/khengui/c-mfifo.git
 ```
+1. Change directory to the root of the project
+1. Build the project
+```bash
+make
+```
 
 ## Running The Tests
 

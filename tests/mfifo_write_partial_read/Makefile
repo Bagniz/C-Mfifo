@@ -9,7 +9,7 @@ PTHREAD=-pthread
 .SILENT:
 all: read write
 	make clear
-	echo 'Compilation Succeed'
+	echo 'Write_Partial_Read Compilation Succeed'
 	
 write: mfile.o write.o
 	$(GCC) $(WALL) $(G) write.o mfile.o $(O) write $(LRT) $(PTHREAD)
@@ -32,3 +32,4 @@ clear:
 clean:
 	rm read
 	rm write
+	echo 'Write_Partial_Read Clean Succeed'

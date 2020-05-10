@@ -1,5 +1,6 @@
 #include "../../src/mfile.h"
 #include <unistd.h>
+#include <string.h>
 
 int main(int argc, char **argv){
     // Variables
@@ -25,7 +26,7 @@ int main(int argc, char **argv){
             // Read writring numbers if existed
             for(int i = 0; i < 100; i++){
                 if(mfifo_read(fifo, &number, sizeof(number)) > 0){
-                    printf("Process \033[1;34m%ld\033[0m read number \033[1;34m%d\033[0m\n", getpid(), number);
+                    printf("Process \033[1;34m%d\033[0m read number \033[1;34m%d\033[0m\n", getpid(), number);
                 }
                 else{
                     printf("Error reading from mfifo object \033[1;34m%s\033[0m\n", argv[1]);

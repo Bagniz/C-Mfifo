@@ -10,7 +10,7 @@ PTHREAD=-pthread
 all: mfile.o free_memory.o
 	$(GCC) $(WALL) $(G) free_memory.o mfile.o $(O) free_memory $(LRT) $(PTHREAD)
 	make clear
-	echo 'Compilation Succeed'
+	echo 'Free_Memory Compilation Succeed'
 	
 free_memory.o: free_memory.c
 	$(GCC) $(WALL) $(G) $(C) free_memory.c
@@ -23,3 +23,4 @@ clear:
 
 clean:
 	rm free_memory
+	echo 'Free_Memory Clean Succeed'

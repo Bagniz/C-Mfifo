@@ -27,7 +27,7 @@ int main(int argc, char **argv){
 
                 // Writing the random number if exists
                 if(mfifo_write(fifo, &number, sizeof(int)) == 0)
-                    printf("Process \033[1;34m%ld\033[0m wrote number \033[1;34m%d\033[0m\n", getpid(), number);
+                    printf("Process \033[1;34m%d\033[0m wrote number \033[1;34m%d\033[0m\n", getpid(), number);
                 else{
                     printf("Error writing to mfifo object \033[1;34m%s\033[0m\n", argv[1]);
                     return 1;

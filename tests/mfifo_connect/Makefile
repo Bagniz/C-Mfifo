@@ -10,7 +10,7 @@ PTHREAD=-pthread
 all: mfile.o connect.o
 	$(GCC) $(WALL) $(G) connect.o mfile.o $(O) connect $(LRT) $(PTHREAD)
 	make clear
-	echo 'Compilation Succeed'
+	echo 'Connect Compilation Succeed'
 	
 connect.o: connect.c
 	$(GCC) $(WALL) $(G) $(C) connect.c
@@ -23,3 +23,4 @@ clear:
 
 clean:
 	rm connect
+	echo 'Connect Clean Succeed'

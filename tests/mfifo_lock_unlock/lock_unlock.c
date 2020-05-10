@@ -19,7 +19,7 @@ int main(int argc, char **argv){
                 // Do something
                 for(int i = 0; i < 5; i++){
                     sleep(1);
-                    printf("\033[1;34m%s\033[0m\n",i);
+                    printf("\033[1;34m%d\033[0m\n",i);
                 }
 
                 // Unclock the mfifo object

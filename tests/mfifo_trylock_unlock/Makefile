@@ -10,7 +10,8 @@ PTHREAD=-pthread
 all: mfile.o trylock_unlock.o
 	$(GCC) $(WALL) $(G) trylock_unlock.o mfile.o $(O) trylock_unlock $(LRT) $(PTHREAD)
 	make clear
-
+	echo 'Compilation Succeed'
+	
 trylock_unlock.o: trylock_unlock.c
 	$(GCC) $(WALL) $(G) $(C) trylock_unlock.c
 

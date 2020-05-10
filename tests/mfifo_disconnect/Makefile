@@ -10,7 +10,8 @@ PTHREAD=-pthread
 all: mfile.o disconnect.o
 	$(GCC) $(WALL) $(G) disconnect.o mfile.o $(O) disconnect $(LRT) $(PTHREAD)
 	make clear
-
+	echo 'Compilation Succeed'
+	
 disconnect.o: disconnect.c
 	$(GCC) $(WALL) $(G) $(C) disconnect.c
 

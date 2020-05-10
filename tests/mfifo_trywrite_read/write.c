@@ -7,6 +7,7 @@ int main(int argc, char **argv){
     // Variables
     mfifo *fifo;
     int number;
+    int counter = 0;
 
     // Set the seed to procces id
     srandom(getpid());
@@ -18,7 +19,7 @@ int main(int argc, char **argv){
             printf("Connected to mfifo object \033[1;34m%s\033[0m\n", argv[1]);
 
             // Write to mfifo object
-            for(int i = 0; i < 100; i++){
+            while(counter < 100){
                 // Wait for one second
                 sleep(1);
 
@@ -26,11 +27,12 @@ int main(int argc, char **argv){
                 number = (random() % 100) + 1;
 
                 // Writing the random number if exists
-                if(mfifo_write(fifo, &number, sizeof(int)) == 0)
+                if(mfifo_trywrite(fifo, &number, sizeof(int)) == 0){
                     printf("Process \033[1;34m%ld\033[0m wrote number \033[1;34m%d\033[0m\n", getpid(), number);
+                    counter++;
+                }
                 else{
                     printf("Error writing to mfifo object \033[1;34m%s\033[0m\n", argv[1]);
-                    return 1;
                 }
             }
         }

@@ -7,21 +7,39 @@ int main(int argc, char **argv){
     mfifo *fifo;
 
     if(argc == 2){
-        // Connect
+        // Connect to mfifo object
         if((fifo = mfifo_connect(argv[1], 0, 0, 0)) != NULL){
+            // Connected to mfifo object
+            printf("Connected to mfifo object \033[1;34m%s\033[0m\n", argv[1]);
+
             if(mfifo_lock(fifo) == 0){
-                printf("\033[1;34m %d\033[0m starting to wait\n", getpid());
-                sleep(10);
-                printf("Process number \033[1;34m%d\033[0m\n", getpid());
-                mfifo_unlock(fifo);
+                // Locked the mfifo object
+                printf("Locked mfifo object \033[1;34m%s\033[0m\n", argv[1]);
+
+                // Do something
+                for(int i = 0; i < 5; i++){
+                    sleep(1);
+                    printf("\033[1;34m%s\033[0m\n",i);
+                }
+
+                // Unclock the mfifo object
+                if(mfifo_unlock(fifo) == 0){
+                    printf("Unlocked mfifo object \033[1;34m%s\033[0m\n", argv[1]);
+                }
+                else{
+                    printf("Error unlocking mfifo object \033[1;34m%s\033[0m\n", argv[1]);
+                }
             }
-            else
-                printf("Error\n");
+            else{
+                printf("Error locking mfifo object \033[1;34m%s\033[0m\n", argv[1]);
+            }
         }
-        else
-            printf("\033[1;34m %s\033[0m does not exist\n", argv[1]);
+        else{
+            printf("Could not connect to mfifo object \033[1;34m%s\033[0m\n", argv[1]);
+        }
     }
-    else
+    else{
         printf("Wrong argument count\n");
+    }
     return 0;
 }

@@ -10,7 +10,8 @@ PTHREAD=-pthread
 all: mfile.o capacity.o
 	$(GCC) $(WALL) $(G) capacity.o mfile.o $(O) capacity $(LRT) $(PTHREAD)
 	make clear
-
+	echo 'Compilation Succeed'
+	
 capacity.o: capacity.c
 	$(GCC) $(WALL) $(G) $(C) capacity.c
 

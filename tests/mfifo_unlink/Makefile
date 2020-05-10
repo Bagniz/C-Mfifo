@@ -10,7 +10,8 @@ PTHREAD=-pthread
 all: mfile.o unlink.o
 	$(GCC) $(WALL) $(G) unlink.o mfile.o $(O) unlink $(LRT) $(PTHREAD)
 	make clear
-
+	echo 'Compilation Succeed'
+	
 unlink.o: unlink.c
 	$(GCC) $(WALL) $(G) $(C) unlink.c
 

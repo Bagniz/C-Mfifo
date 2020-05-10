@@ -5,7 +5,7 @@
 int main(int argc, char **argv){
     // Variables
     mfifo *fifo;
-    int number;
+    char cs;
 
     if(argc == 2 || argc == 3){
         // Connect to mfifo object
@@ -24,9 +24,9 @@ int main(int argc, char **argv){
             }
 
             // Read writring numbers if existed
-            for(int i = 0; i < 100; i++){
-                if(mfifo_read(fifo, &number, sizeof(number)) > 0){
-                    printf("Process \033[1;34m%d\033[0m read number \033[1;34m%d\033[0m\n", getpid(), number);
+            for(int i = 0; i < 10; i++){
+                if(mfifo_read(fifo, &cs, sizeof(char)) > 0){
+                    printf("Process \033[1;34m%d\033[0m read caracter \033[1;34m%c\033[0m\n", getpid(), cs);
                 }
                 else{
                     printf("Error reading from mfifo object \033[1;34m%s\033[0m\n", argv[1]);
@@ -43,6 +43,7 @@ int main(int argc, char **argv){
                 }
                 else{
                     printf("Error unlocking mfifo object \033[1;34m%s\033[0m\n", argv[1]);
+                    perror("");
                 }
             }
         }

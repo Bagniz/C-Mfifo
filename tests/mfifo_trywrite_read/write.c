@@ -20,15 +20,12 @@ int main(int argc, char **argv){
 
             // Write to mfifo object
             while(counter < 100){
-                // Wait for one second
-                sleep(1);
-
                 // Generating a random number
                 number = (random() % 100) + 1;
 
                 // Writing the random number if exists
                 if(mfifo_trywrite(fifo, &number, sizeof(int)) == 0){
-                    printf("Process \033[1;34m%d\033[0m wrote number \033[1;34m%d\033[0m\n", getpid(), number);
+                    printf("%d. Process \033[1;34m%d\033[0m wrote number \033[1;34m%d\033[0m\n", counter, getpid(), number);
                     counter++;
                 }
                 else{

@@ -286,7 +286,7 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
                         fifo->turned = true;
                     }
 
-                    if(memmove(fifo->memory + fifo->finish, buffer + written, 1) == NULL){
+                    if(memmove(fifo->memory + fifo->finish, buffer + written + i, 1) == NULL){
                         // Unlock the mutex
                         pthread_mutex_unlock(&fifo->mutexWriter);
 

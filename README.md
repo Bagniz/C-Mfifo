@@ -227,6 +227,9 @@ Provide the `mfifo object`'s `name`
 
 # Connected to mfifo object mfifo
 #  mfifo free space is 20
+
+# PS: (It also includes the case in the memory that never contains a value
+# thats why if mfifo is empty, than mfifo_free_memory(mfifo) > mfifo_capacity(mfifo))
 ```
 
 You can use the `clean` option of `make` to delete the executables

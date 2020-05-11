@@ -6,6 +6,7 @@ int main(int argc, char **argv){
     // Variables
     mfifo *fifo;
     int number;
+    int counter = 0;
 
     if(argc == 2 || argc == 3){
         // Connect to mfifo object
@@ -24,9 +25,10 @@ int main(int argc, char **argv){
             }
 
             // Read writring numbers if existed
-            for(int i = 0; i < 100; i++){
+            while(counter < 100){
                 if(mfifo_read(fifo, &number, sizeof(number)) > 0){
-                    printf("%d. Process \033[1;34m%d\033[0m read number \033[1;34m%d\033[0m\n", i, getpid(), number);
+                    printf("%d. Process \033[1;34m%d\033[0m read number \033[1;34m%d\033[0m\n", counter, getpid(), number);
+                    counter++;
                 }
                 else{
                     printf("Error reading from mfifo object \033[1;34m%s\033[0m\n", argv[1]);

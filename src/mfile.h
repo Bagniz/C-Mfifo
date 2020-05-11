@@ -82,12 +82,6 @@ int mfifo_unlock(mfifo *fifo);
 int mfifo_trylock(mfifo *fifo);
 
 /**
- * A function to unlock all locked
- * mfifo objects by a process
-*/
-int mfifo_unlock_all(void);
-
-/**
  * Returns the capacity of mfifo
  * objects passed as a param.
  * Returns capacity if successful, 0 for empty errors (Sets errno)

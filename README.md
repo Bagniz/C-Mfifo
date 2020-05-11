@@ -436,6 +436,9 @@ Provide the `mfifo object`'s `name`
 # if flase, use only read()
 
 # Results
+
+# IF (true)
+
 # Connected to mfifo object mfifo
 # Locked mfifo object mfifo
 # Process 20389 read caracter a

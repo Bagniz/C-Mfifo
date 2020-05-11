@@ -171,7 +171,7 @@ mfifo *mfifo_connect(const char *name, int options, mode_t permission, size_t ca
 
 int mfifo_disconnect(mfifo *fifo){
     if(fifo != NULL){
-        // Deallocate all the fifo mapping
+        // Deallocate all the mfifo mapping
         return munmap(fifo, sizeof(mfifo) + (fifo->capacity * sizeof(char)));
     }
     errno = EINVAL;
@@ -179,7 +179,7 @@ int mfifo_disconnect(mfifo *fifo){
 }
 
 int mfifo_unlink(const char *name){
-    // Unlink the sharedMfifoObject
+    // Unlink the mfifo
     if(name != NULL)
         return shm_unlink(name);
 
@@ -216,7 +216,7 @@ static int writeMFifo(mfifo *fifo, const void *buffer, size_t length){
 int mfifo_write(mfifo *fifo, const void *buffer, size_t length){
     // If there is no free space to write
     if(length < fifo->capacity){
-        // Lock the object
+        // Lock the object on writing
         pthread_mutex_lock(&fifo->mutexWriter);
 
         // Lock data protector mutex
@@ -250,7 +250,7 @@ int mfifo_trywrite(mfifo *fifo, const void *buffer, size_t length){
 
     // If there is no free space to write
     if(length < fifo->capacity){
-        // Try to lock on the fifo object
+        // Try to lock on the fifo object on writing
         if((code = pthread_mutex_trylock(&fifo->mutexWriter)) == 0){
             // Lock data protector mutex
             pthread_mutex_lock(&fifo->mutex);
@@ -275,7 +275,7 @@ int mfifo_trywrite(mfifo *fifo, const void *buffer, size_t length){
     // Unlock data protector mutex
     pthread_mutex_unlock(&fifo->mutex);
 
-    // Unlock the mutex
+    // Unlock the writer mutex
     pthread_mutex_unlock(&fifo->mutexWriter);
     
     return OP_FAILED;
@@ -289,7 +289,7 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
     if(fifo->capacity > 1){
         // While we did not write everything
         while(length > 0){
-            // Lock the object
+            // Lock the object on writing
             pthread_mutex_lock(&fifo->mutexWriter);
 
             // Lock data protector mutex
@@ -305,7 +305,7 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
                         // Unlock data protector mutex
                         pthread_mutex_unlock(&fifo->mutex);
 
-                        // Unlock the mutex
+                        // Unlock the writer mutex
                         pthread_mutex_unlock(&fifo->mutexWriter);
 
                         return OP_FAILED;
@@ -325,7 +325,7 @@ int mfifo_write_partial(mfifo *fifo, const void *buffer, size_t length){
             // Unlock data protector mutex
             pthread_mutex_unlock(&fifo->mutex);
 
-            // Unlock the mutex
+            // Unlock the writer mutex
             pthread_mutex_unlock(&fifo->mutexWriter);
 
             // Signal readers that want to read
@@ -347,7 +347,7 @@ static ssize_t readMFifo(mfifo *fifo, void *buffer, size_t length, bool toUnlock
             pthread_mutex_unlock(&fifo->mutex);
 
             if(toUnlock){
-                // Unlock the mutex
+                // Unlock the reader mutex
                 pthread_mutex_unlock(&fifo->mutexReader);
             }
 
@@ -362,7 +362,7 @@ static ssize_t readMFifo(mfifo *fifo, void *buffer, size_t length, bool toUnlock
     pthread_mutex_unlock(&fifo->mutex);
     
     if(toUnlock){
-        // Unlock the mutex
+        // Unlock the reader mutex
         pthread_mutex_unlock(&fifo->mutexReader);
     }
 
@@ -377,7 +377,7 @@ ssize_t mfifo_read(mfifo *fifo, void *buffer, size_t length){
     size_t toRead, filledSpace;
     int code;
 
-    // Try lock the mutexReader
+    // Try lock the mutexReader on reading
     if((code = pthread_mutex_lock(&fifo->mutexReader)) == 0){
         // Lock data protector mutex
         pthread_mutex_lock(&fifo->mutex);

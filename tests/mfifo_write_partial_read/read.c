@@ -43,7 +43,6 @@ int main(int argc, char **argv){
                 }
                 else{
                     printf("Error unlocking mfifo object \033[1;34m%s\033[0m\n", argv[1]);
-                    perror("");
                 }
             }
         }

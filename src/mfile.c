@@ -416,6 +416,8 @@ ssize_t mfifo_read(mfifo *fifo, void *buffer, size_t length){
         // Unlock data protector mutex
         pthread_mutex_unlock(&fifo->mutex);
     }
+
+    errno = code;
     return OP_FAILED;
 }
 
